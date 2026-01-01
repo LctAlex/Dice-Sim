@@ -10,32 +10,19 @@ void print_help()
 {
     std::cout << "\nPlease add command arguments + values.\n"
                     << "Available arguments:\n"
-                    << "'--faces' (values: [6, 8, 10, 12, 20]) <- Number of faces each dice will have. (6 faces by default)\n"
-                    << "'--dice' (values: [1,...,10000]) <- One can roll so many dice... (2 dice by default)\n"
-                    << "'--rolls' (values: any) <- Number of rolls for each dice.\n"
-                    << "'--game' (modes: ['stats', 'prob', 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
+                    << "'--faces <value>' (values: [6, 8, 10, 12, 20]) <- Number of faces each dice will have. (6 faces by default)\n"
+                    << "'--dice <value>' (values: [1,...,MAX_INT]) <- One can roll so many dice... (2 dice by default)\n"
+                    << "'--rolls <value>' (values: [1,...,MAX_INT]) <- Number of rolls for each dice.\n"
+                    << "'--game <mode>' (modes: ['stats', 'prob', 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
                     << "\n";
 }
 
 void print_error(const char *err)
 {
-    std::cout << "\nError with reading the command: ***" << err << "***\n"
-            <<"Please make sure to add arguments+values like this: '--argument <value>'.\n";
+    std::cout << "\nError with reading the command. ***" << err << "***\n"
+    << "Please make sure to add arguments + values like this: '--argument <value/mode>'.\n";
 }
-
-//Honorable mention:
-// bool is_number(const char string[])
-// {
-//     int stringSize = 0;
-//     while(string[stringSize] != '\0') ++stringSize;
-
-//     for(int i = 0; i < stringSize; i++)
-//     {
-//         if(!isdigit(string[i])) return false;
-//     }
-//     return true;
-// }
-
+        
 bool is_number(const char* str)
 {
     if(!str || *(str) == '\0') return false;
@@ -46,14 +33,24 @@ bool is_number(const char* str)
     return true;
 }
 
-enum gameMode {stats, prob, sum, craps, yahtzee};
+const char* gameVec[5] = {"stats", "prob", "sum", "craps", "yahtzee"};
+
+const char* get_game(const char* str) //*str will be argv[i+1], if nothing works, *game = '\0'
+{
+    if(!str || *(str) == '\0') return NULL;
+    for(int i = 0; i < sizeof(gameVec)/sizeof(gameVec[0]); i++)
+    {
+        if(strcmp(str, gameVec[i]) == 0) return gameVec[i];
+    }
+    return NULL;
+}
 
 int main(int argc, char* argv[])
 {
     unsigned int faces = DEFAULT_FACES;
     unsigned int dice = DEFAULT_DICE;
     unsigned int rolls = DEFAULT_ROLLS;
-    gameMode game = stats;
+    char game[] = "stats";
 
     if(argc == 1)
     {
@@ -61,46 +58,53 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    for(int i = 1; i < argc; i+=2)
+    for(int i = 1; i < argc; i++)
     {
-        //we need to check for '--game' command tho, it doesn't take ints as values
-        char* temp = NULL;
-        strcpy(temp, argv[i]);
-        if(!is_number(argv[i+1]) && (!strcmp(temp, "--game")))
-        {
-            print_error(argv[i+1]);
-            return 0;
-        }
-
+        if(is_number(argv[i])) continue;
         if((strcmp(argv[i], "--faces") == 0) && (i+1) <= argc)
         {
+            if(!is_number(argv[i+1])) 
+            {
+                print_error(strcat(argv[i],strcat(argv[i+1], " <- there should be a value")));
+                return 0;
+            }
             faces = atoi(argv[i+1]);
         }
         else if((strcmp(argv[i], "--dice") == 0) && (i+1) <= argc)
         {
+            if(!is_number(argv[i+1])) 
+            {
+                print_error(strcat(argv[i],strcat(argv[i+1], " <- this should be a value")));
+                return 0;
+            }
             dice = atoi(argv[i+1]);
         }
         else if((strcmp(argv[i], "--rolls") == 0) && (i+1) <= argc)
         {
+            if(!is_number(argv[i+1])) 
+            {
+                print_error(strcat(argv[i],strcat(argv[i+1], " <- this should be a value")));
+                return 0;
+            }
             rolls = atoi(argv[i+1]);
         }
         else if((strcmp(argv[i], "--game") == 0) && (i+1) <= argc)
         {
-            //I'd use a switch so hard but IDK how
-            if(strcmp(argv[i+1], "stats") == 0) game = stats;
-            else if(strcmp(argv[i+1], "prob") == 0) game = prob;
-            else if(strcmp(argv[i+1], "sum") == 0) game = sum;
-            else if(strcmp(argv[i+1], "craps") == 0) game = craps;
-            else if(strcmp(argv[i+1], "yahtzee") == 0) game = yahtzee;
-            else 
-            {
-                print_error(argv[i+1]);
-                return 0;
-            }
+            // const char* mode = get_game(argv[i+1]);
+            // if(*mode != '\0')
+            // {
+            //     std::cout << "MODE != '\0'";
+            //     strcpy(game, get_game(argv[i+1]));
+            // }
+            // else 
+            // {
+            //     std::cout << "MODE = '\0'";
+            //     print_error(strcat(argv[i], strcat(argv[i+1], " <- not a game mode")));
+            // }
         }
         else
         {
-            print_error(strcat(strcat(argv[i], " "), argv[i+1]));
+            print_error(strcat(argv[i], " <- wrong/unrecognized command"));
             return 0;
         }
     }
@@ -114,3 +118,4 @@ int main(int argc, char* argv[])
 }
 
 //Unblock-File .\main.exe
+//Ai bagat si main.exe in primul commit, sa te asiguri ca e sters
