@@ -2,19 +2,24 @@
 #include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+
+#include "numbers.hpp"
 
 #define DEFAULT_FACES 6
 #define DEFAULT_DICE 2
 #define DEFAULT_ROLLS 100
+const char* gameVec[5] = {"stats", "prob", "sum", "craps", "yahtzee"};
 
 void print_help()
 {
     std::cout << "\nPlease add command arguments + values.\n"
                     << "Available arguments:\n"
                     << "'--faces <value>' (values: [6, 8, 10, 12, 20]) <- Number of faces each dice will have. (6 faces by default)\n"
-                    << "'--dice <value>' (values: [1,...,MAX_INT]) <- One can roll so many dice... (2 dice by default)\n"
+                    << "'--dice <value>' (values: [1,...,MAX_INT]) <- Number of dice to roll (2 dice by default)\n"
                     << "'--rolls <value>' (values: [1,...,MAX_INT]) <- Number of rolls for each dice.\n"
-                    << "'--game <mode>' (modes: ['stats', 'prob', 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
+                    << "'--game <mode>' (modes: ['stats', 'prob' <TAKES VALUE>, 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
+                    << "Command example: ./program --dice 20 --faces 12 --game prob 7\n"
                     << "\n";
 }
 
@@ -34,8 +39,6 @@ bool is_number(const char* str)
     return true;
 }
 
-const char* gameVec[5] = {"stats", "prob", "sum", "craps", "yahtzee"};
-
 const char* get_game(const char* str)
 {
     if(!str || *(str) == '\0') return NULL;
@@ -45,6 +48,21 @@ const char* get_game(const char* str)
     }
     return NULL;
 }
+
+int find_gamemode(const char* game)
+{
+    for(int i = 0; i < sizeof(gameVec)/sizeof(gameVec[0]); i++)
+    {
+        if(strcmp(gameVec[i], game) == 0) return i;
+    }
+    print_error("Turns out the game mode wasn't registered", false);
+    return 0;
+}
+
+void print_stats(){};
+void print_prob(){};
+void print_sum(unsigned int sum){};
+
 
 int main(int argc, char* argv[])
 {
@@ -119,7 +137,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-            print_error((std::string(argv[i]) + " <- Unrecognized command").c_str(), true);
+            print_error((std::string(argv[i]) + " <- Wrong/unrecognized command").c_str(), true);
             return 0;
         }
     }
@@ -127,8 +145,43 @@ int main(int argc, char* argv[])
     std::cout << "Faces: " << faces << '\n'
             << "Dice: " << dice << '\n'
             << "Rolls: " << rolls << '\n'
-            << "Game: " << game << '\n';
-
+            << "Game: " << game << '\n'
+            << "\n\nRolling dice...\n\n";
+    
+    //Now we'll use a switch for the game-mode. To use a switch, we'll find the index of our game inside gameVec and we'll use the switch based on that index
+    int index = find_gamemode(game);
+    std::cout << "Game " << index << " is active...\n";
+    switch(index)
+    {
+        case 0:
+        {
+            std::cout << "Shouldn't see this";
+            break;
+        }
+        case 1:
+        {
+            std::cout << "Neither this";
+            break;
+        }
+        case 2:
+        {
+            int sum = 0;
+            uint32_t seed = get_XORshift_seed();
+            uint32_t* seedPtr = &seed;
+            for(int i = 0; i < rolls; i++)
+            {
+                for(int j = 0; j < dice; j++)
+                {
+                    update_XORshift_seed(seedPtr);
+                    srand(seed);
+                    std::cout << seed << std::endl;
+                    std::cout << "random number off this: " << rand() << std::endl;
+                }
+            }
+            break;
+        }
+    }
+       
     return 0;
 }
 
