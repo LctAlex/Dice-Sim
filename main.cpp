@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <string.h>
 #include <stdlib.h>
 
@@ -17,10 +18,10 @@ void print_help()
                     << "\n";
 }
 
-void print_error(const char *err)
+void print_error(const char *err, bool stop)
 {
-    std::cout << "\nError with reading the command. ***" << err << "***\n"
-    << "Please make sure to add arguments + values like this: '--argument <value/mode>'.\n";
+    std::cout << "\nError with reading the command. ***" << err << "***\n";
+    if(stop) std::cout << "Please make sure to add arguments + values like this: '--argument <value/mode>'.\n\n";
 }
         
 bool is_number(const char* str)
@@ -35,7 +36,7 @@ bool is_number(const char* str)
 
 const char* gameVec[5] = {"stats", "prob", "sum", "craps", "yahtzee"};
 
-const char* get_game(const char* str) //*str will be argv[i+1], if nothing works, *game = '\0'
+const char* get_game(const char* str)
 {
     if(!str || *(str) == '\0') return NULL;
     for(int i = 0; i < sizeof(gameVec)/sizeof(gameVec[0]); i++)
@@ -60,51 +61,65 @@ int main(int argc, char* argv[])
 
     for(int i = 1; i < argc; i++)
     {
-        if(is_number(argv[i])) continue;
-        if((strcmp(argv[i], "--faces") == 0) && (i+1) <= argc)
+        if((strcmp(argv[i], "--faces") == 0))
         {
-            if(!is_number(argv[i+1])) 
+            if(((i+1) >= argc) || (!is_number(argv[i+1]))) 
             {
-                print_error(strcat(argv[i],strcat(argv[i+1], " <- there should be a value")));
-                return 0;
+                print_error("No valid value given to --faces", false);
             }
-            faces = atoi(argv[i+1]);
-        }
-        else if((strcmp(argv[i], "--dice") == 0) && (i+1) <= argc)
-        {
-            if(!is_number(argv[i+1])) 
+            else
             {
-                print_error(strcat(argv[i],strcat(argv[i+1], " <- this should be a value")));
-                return 0;
+                faces = atoi(argv[i+1]);
+                i++;
             }
-            dice = atoi(argv[i+1]);
         }
-        else if((strcmp(argv[i], "--rolls") == 0) && (i+1) <= argc)
+        else if((strcmp(argv[i], "--dice") == 0))
         {
-            if(!is_number(argv[i+1])) 
+            if(((i+1) >= argc) || (!is_number(argv[i+1])))
             {
-                print_error(strcat(argv[i],strcat(argv[i+1], " <- this should be a value")));
-                return 0;
+                print_error("No valid value given to --dice", false);
             }
-            rolls = atoi(argv[i+1]);
+            else
+            {
+                dice = atoi(argv[i+1]);
+                i++;
+            }
         }
-        else if((strcmp(argv[i], "--game") == 0) && (i+1) <= argc)
+        else if((strcmp(argv[i], "--rolls") == 0))
         {
-            // const char* mode = get_game(argv[i+1]);
-            // if(*mode != '\0')
-            // {
-            //     std::cout << "MODE != '\0'";
-            //     strcpy(game, get_game(argv[i+1]));
-            // }
-            // else 
-            // {
-            //     std::cout << "MODE = '\0'";
-            //     print_error(strcat(argv[i], strcat(argv[i+1], " <- not a game mode")));
-            // }
+            if(((i+1) >= argc) || (!is_number(argv[i+1])))
+            {
+                print_error("No valid value given to --rolls", false);
+            }
+            else
+            {
+                rolls = atoi(argv[i+1]);
+                i++;
+            }
+        }
+        else if((strcmp(argv[i], "--game") == 0))
+        {
+            const char* mode = "stats";
+            if((i+1) >= argc)
+            {
+                print_error("No valid mode given to --game", false);
+                continue;
+            } 
+            else mode = get_game(argv[i+1]);
+
+            if(mode == NULL)
+            {
+                print_error("No valid mode given to --game", false);
+            }
+            else
+            {
+                strcpy(game, mode);
+                i++;
+            }
         }
         else
         {
-            print_error(strcat(argv[i], " <- wrong/unrecognized command"));
+            print_error((std::string(argv[i]) + " <- Unrecognized command").c_str(), true);
             return 0;
         }
     }
@@ -118,4 +133,3 @@ int main(int argc, char* argv[])
 }
 
 //Unblock-File .\main.exe
-//Ai bagat si main.exe in primul commit, sa te asiguri ca e sters
