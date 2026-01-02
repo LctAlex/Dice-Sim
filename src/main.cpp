@@ -11,19 +11,19 @@
 #define DEFAULT_DICE 2
 #define DEFAULT_ROLLS 100
 
-void print_stats(){};
-void print_prob(){};
-void print_sum(unsigned int sum){};
+// void print_stats(){};
+// void print_prob(){};
+// void print_sum(unsigned int sum){};
 
 
 int main(int argc, char* argv[])
 {
-    int probability = 0;
-
     unsigned int faces = DEFAULT_FACES;
     unsigned int dice = DEFAULT_DICE;
     unsigned int rolls = DEFAULT_ROLLS;
     char game[] = "stats";
+    
+    unsigned int probSum = 0;
 
     if(argc == 1)
     {
@@ -35,11 +35,7 @@ int main(int argc, char* argv[])
     {
         if((strcmp(argv[i], "--faces") == 0))
         {
-            if(((i+1) >= argc) || (!is_number(argv[i+1]))) 
-            {
-                print_error("No valid value given to --faces", false);
-                continue;
-            }
+            if(((i+1) >= argc) || (!is_number(argv[i+1]))) print_error("No valid <value> given to '--faces'", false);
             else
             {
                 faces = atoi(argv[i+1]);
@@ -48,11 +44,7 @@ int main(int argc, char* argv[])
         }
         else if((strcmp(argv[i], "--dice") == 0))
         {
-            if(((i+1) >= argc) || (!is_number(argv[i+1])))
-            {
-                print_error("No valid value given to --dice", false);
-                continue;
-            }
+            if(((i+1) >= argc) || (!is_number(argv[i+1]))) print_error("No valid <value> given to '--dice'", false);
             else
             {
                 dice = atoi(argv[i+1]);
@@ -61,11 +53,7 @@ int main(int argc, char* argv[])
         }
         else if((strcmp(argv[i], "--rolls") == 0))
         {
-            if(((i+1) >= argc) || (!is_number(argv[i+1])))
-            {
-                print_error("No valid value given to --rolls", false);
-                continue;
-            }
+            if(((i+1) >= argc) || (!is_number(argv[i+1]))) print_error("No valid <value> given to '--rolls'", false);
             else
             {
                 rolls = atoi(argv[i+1]);
@@ -75,17 +63,11 @@ int main(int argc, char* argv[])
         else if((strcmp(argv[i], "--game") == 0))
         {
             const char* mode = "stats";
-            if((i+1) >= argc)
-            {
-                print_error("No valid mode given to --game", false);
-                continue;
-            } 
+            if((i+1) >= argc) print_error("No valid <mode> given to '--game'", false);
             else mode = get_game(argv[i+1]);
-
             if(mode == NULL)
             {
-                print_error("No valid mode given to --game", false);
-                continue;
+                print_error("No valid <mode> given to --game", false); //we won't jump over the following command (thus it'll crash if it's not an arg)
             }
             else
             {
@@ -93,19 +75,30 @@ int main(int argc, char* argv[])
                 {
                     if(!is_number(argv[i+2]))
                     {
-                        print_error("No valid value given to '--game prob'", false);
+                        print_error("No valid <value> given to '--game prob'", false);
                         continue;
                     }
                     else
                     {
-                        probability = atoi(argv[i+2]);
+                        if(atoi(argv[i+2]) <= 0)
+                        {
+                            print_error("In '--game prob <value>', <value> can't be <=0\n\
+                                    This command returns the PROBABILITY of the SUM given as <value>\n\
+                                    Try setting a <value> between [dice*rolls, faces*dice*rolls (or a high value)]", true); //SPECIAL CASE: string req met, but info are not good
+                            return 0;
+                        }
+                        probSum = atoi(argv[i+2]);
                         i++;
                     }
                 }
                 strcpy(game, mode);
-                std::cout << "Probability: " << probability << std::endl;
                 i++;
             }
+        }
+        else if ((strcmp(argv[i], "--help") == 0) || (strcmp(argv[i], "--h") == 0))
+        {
+            print_help();
+            return 0;
         }
         else
         {
@@ -114,14 +107,9 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::cout << "Faces: " << faces << '\n'
-            << "Dice: " << dice << '\n'
-            << "Rolls: " << rolls << '\n'
-            << "Game: " << game << '\n'
-            << "\n\nRolling dice...\n\n";
-
+    print_info(faces, dice, rolls, game, probSum);
     int index = find_gamemode(game);
-    //std::cout << "Game " << index << " is active...\n";
+    //const char* gameVec[5] = {"stats", "prob", "sum", "craps", "yahtzee"};
     switch(index)
     {
         case 0:
@@ -137,13 +125,10 @@ int main(int argc, char* argv[])
         case 2:
         {
             unsigned int sum = get_sum(dice, rolls, faces);
-            std::cout << "Total sum: "<< sum << std::endl
-                    << "Total average: " << (float)sum /(dice*rolls) << std::endl;
+            std::cout << "Total SUM: "<< sum << '\n';
             break;
         }
     }
        
     return 0;
 }
-
-//Unblock-File .\main.exe

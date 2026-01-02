@@ -8,14 +8,24 @@ void update_XORshift_seed(uint32_t* seed)
     x ^= x << 5;
     *seed = x;
 }
+
 unsigned int get_random_number(unsigned int min, unsigned int max) //requires an already-set srand(seed)
 {
     return min + (rand() % max);
 }
 
+float get_total_average(unsigned int sum, unsigned int rolls, unsigned int dice)
+{
+    return (float)sum / (rolls * dice);
+}
 
+float get_theoretical_average(unsigned int faces)
+{
+    unsigned int faceSum = 0;
+    for(int i = 1; i <= faces; i++) faceSum += i;
+    return (1 / (float)faces) * faceSum;
+}
 
-// MAIN functions:
 unsigned int get_sum(unsigned int rolls, unsigned int dice, unsigned int faces)
 {
     unsigned int sum = 0;

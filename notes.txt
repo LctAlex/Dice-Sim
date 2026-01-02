@@ -1,1 +1,7 @@
-should probably remove the 'continue's, they do nothing.
+should probably remove the 'continue's, they do nothing. DO THEY??? I only need one for '--game'
+
+to count probabilities for each face: faceVec[faces] = {};
+for(int i = 1; i <= faces; i++){ if(get_rand_num() == i) faceVec[i-1]++;} //SUPER costy and ineffcient, but whatever
+
+MUST verify the given values by each argument (none can be negative)...Except it checks out... atoi can't convert neggative numbers
+must check if faces = {6, 8, 10, 12, 20} tho..

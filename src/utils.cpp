@@ -2,20 +2,34 @@
 
 void print_help()
 {
-    std::cout << "\nPlease add command arguments + values.\n"
+    std::cout << "\nHELP:: Please add command arguments + values.\n"
                     << "Available arguments:\n"
                     << "'--faces <value>' (values: [6, 8, 10, 12, 20]) <- Number of faces each dice will have. (6 faces by default)\n"
-                    << "'--dice <value>' (values: [1,...,MAX_INT]) <- Number of dice to roll (2 dice by default)\n"
-                    << "'--rolls <value>' (values: [1,...,MAX_INT]) <- Number of rolls for each dice.\n"
+                    << "'--dice <value>' (values: [1,...,MAX_INT]) <- Number of dice to roll. (2 dice by default)\n"
+                    << "'--rolls <value>' (values: [1,...,MAX_INT]) <- Number of rolls for each dice. (100 rolls by default)\n"
                     << "'--game <mode>' (modes: ['stats', 'prob' <takes VALUE>, 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
                     << "Command example: ./program --dice 20 --faces 12 --game prob 7\n"
+                    << "Use '--h' or '--help' to see this again.\n"
                     << "\n";
 }
 
 void print_error(const char *err, bool stop)
 {
-    std::cout << "\nError with reading the command. *** " << err << " ***\n";
-    if(stop) std::cout << "Please make sure to add arguments + values like this: '--argument <value/mode>'.\n\n";
+    std::cout << "\nERROR:: Error with reading the command. *** " << err << " ***\n";
+    if(stop) std::cout << "Please make sure to add arguments + values/modes like this: '--argument <value/mode>'.\n\n";
+}
+
+void print_info(unsigned int faces, unsigned int dice, unsigned int rolls, char game[], unsigned int probSum)
+{
+    std::cout << "\nINFO:\n"
+            << "=====\n"
+            << "Faces: " << faces << '\n'
+            << "Dice: " << dice << '\n'
+            << "Rolls: " << rolls << '\n'
+            << "Game: " << game << '\n'
+            << ((probSum) ? (std::string("Probability Sum: ") + std::to_string(probSum) +'\n').c_str() : ("\0")) //surprised this works!
+            << "====="
+            << "\n\nRolling dice...\n\n";
 }
 
 bool is_number(const char* str)

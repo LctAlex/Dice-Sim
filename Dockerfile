@@ -4,7 +4,7 @@ WORKDIR /build
 
 COPY ./src ./src
 
-RUN g++ -static -o main src/main.cpp
+RUN g++ -static -o main src/*.cpp
 
 FROM scratch
 
