@@ -11,11 +11,6 @@
 #define DEFAULT_DICE 2
 #define DEFAULT_ROLLS 100
 
-// void print_stats(){};
-// void print_prob(){};
-// void print_sum(unsigned int sum){};
-
-
 int main(int argc, char* argv[])
 {
     unsigned int faces = DEFAULT_FACES;
@@ -33,6 +28,10 @@ int main(int argc, char* argv[])
 
     for(int i = 1; i < argc; i++)
     {
+        if (strcmp(argv[i], "--.") == 0) //will go with defaults for what hasn't changed
+        {
+            break;
+        }
         if((strcmp(argv[i], "--faces") == 0))
         {
             if(((i+1) >= argc) || (!is_number(argv[i+1]))) print_error("No valid <value> given to '--faces'", false);
@@ -114,7 +113,18 @@ int main(int argc, char* argv[])
     {
         case 0:
         {
-            std::cout << "Should see this";
+            unsigned int* resultVec = get_stats_vec(faces, dice, rolls);
+            std::cout << "Frequencies: \n";
+            for(int i = 0; i < faces; i++)
+            {
+                std::cout << i+1 << ": " << *(resultVec + i) << " (" << ((float)*(resultVec + i) / (dice * rolls)) * 100.f << "%)\n";
+            }
+            unsigned int totalSum = get_vec_sum(resultVec, faces);
+            float mean = get_mean(totalSum, dice, rolls);
+            float stdDev = get_standard_deviation(resultVec, mean, faces, dice, rolls);
+            std::cout << "\nMean: " << mean
+                    << " (Theoretical: " << get_theoretical_mean(faces) << ")\n"
+                    << "Standard deviation: " << stdDev << '\n';
             break;
         }
         case 1:
@@ -124,7 +134,7 @@ int main(int argc, char* argv[])
         }
         case 2:
         {
-            unsigned int sum = get_sum(dice, rolls, faces);
+            unsigned int sum = get_sum(faces, dice, rolls);
             std::cout << "Total SUM: "<< sum << '\n';
             break;
         }
@@ -132,3 +142,5 @@ int main(int argc, char* argv[])
        
     return 0;
 }
+
+//Unblock-File ./main.exe

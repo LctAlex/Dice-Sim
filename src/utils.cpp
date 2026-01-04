@@ -2,7 +2,7 @@
 
 void print_help()
 {
-    std::cout << "\nHELP:: Please add command arguments + values.\n"
+    std::cout << "\nINFO:: Please add command arguments + values.\n"
                     << "Available arguments:\n"
                     << "'--faces <value>' (values: [6, 8, 10, 12, 20]) <- Number of faces each dice will have. (6 faces by default)\n"
                     << "'--dice <value>' (values: [1,...,MAX_INT]) <- Number of dice to roll. (2 dice by default)\n"
@@ -10,6 +10,7 @@ void print_help()
                     << "'--game <mode>' (modes: ['stats', 'prob' <takes VALUE>, 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
                     << "Command example: ./program --dice 20 --faces 12 --game prob 7\n"
                     << "Use '--h' or '--help' to see this again.\n"
+                    << "Use '--.' to just go with the defaults.\n"
                     << "\n";
 }
 
