@@ -31,13 +31,10 @@ unsigned int* get_stats_vec(unsigned int faces, unsigned int dice, unsigned int 
     update_XORshift_seed(seedPtr);
     srand(seed);
     unsigned int* resultVec = init_empty_vec(faces);
-    for(int i = 0; i < rolls; i++)
+    for(int i = 0; i < dice * rolls; i++)
     {
-        for(int j = 0 ; j < dice; j++)
-        {
-            unsigned int index = get_random_number(0, faces);
-            *(resultVec + index) += 1;
-        }
+        unsigned int index = get_random_number(0, faces);
+        *(resultVec + index) += 1;
     }
     return resultVec;
 }
@@ -74,6 +71,44 @@ float get_standard_deviation(unsigned int* statsVec, float mean, unsigned int fa
     return sqrt(devSum/(dice*rolls));
 }
 
+unsigned int get_successes_prob(unsigned int probSum, unsigned int faces, unsigned int dice, unsigned int rolls)
+{
+    unsigned int tempSum = 0;
+    unsigned int successes = 0;
+    uint32_t seed = time(NULL);
+    uint32_t* seedPtr = &seed;
+    update_XORshift_seed(seedPtr);
+    srand(seed);
+    for(int i = 0; i < rolls; i++)
+    {
+        for(int j = 0; j < dice; j++)
+        {
+            tempSum += get_random_number(1, faces);
+        }
+        if(probSum == tempSum) successes++;
+        tempSum = 0;
+    }
+    return successes;
+}
+
+long long binom(int n, int k)
+{
+    long long res = 1;
+    for (int i = 1; i <= k; i++)
+    res = res * (n - k + i) / i;
+    return res;
+}
+
+float get_theoretical_prob(unsigned int faces, unsigned int dice, unsigned int probSum)
+{
+    long long sum = 0;
+    int maxIndex = (probSum - dice) / faces;
+    for(int i = 0; i <= maxIndex; i++)
+    sum += ((i%2 == 0)? 1:-1) * binom(dice, i) * binom(probSum-faces*i-1, dice-1);
+
+    return (1.f/pow(faces, dice) * sum);
+}
+
 unsigned int get_sum(unsigned int rolls, unsigned int dice, unsigned int faces)
 {
     unsigned int sum = 0;
@@ -81,12 +116,9 @@ unsigned int get_sum(unsigned int rolls, unsigned int dice, unsigned int faces)
     uint32_t* seedPtr = &seed;
     update_XORshift_seed(seedPtr);
     srand(seed);
-    for(int i = 0; i < rolls; i++)
+    for(int i = 0; i < dice * rolls; i++)
     {
-        for(int j = 0 ; j < dice; j++)
-        {
-            sum += get_random_number(1, faces);
-        }
+        sum += get_random_number(1, faces);
     }
     return sum;
 }

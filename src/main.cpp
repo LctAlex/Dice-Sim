@@ -117,7 +117,9 @@ int main(int argc, char* argv[])
             std::cout << "Frequencies: \n";
             for(int i = 0; i < faces; i++)
             {
-                std::cout << i+1 << ": " << *(resultVec + i) << " (" << ((float)*(resultVec + i) / (dice * rolls)) * 100.f << "%)\n";
+                std::cout << i+1 << ": " 
+                        << *(resultVec + i) 
+                        << " (" << ((float)*(resultVec + i) / (dice * rolls)) * 100.f << "%)\n";
             }
             unsigned int totalSum = get_vec_sum(resultVec, faces);
             float mean = get_mean(totalSum, dice, rolls);
@@ -129,7 +131,14 @@ int main(int argc, char* argv[])
         }
         case 1:
         {
-            std::cout << "Neither this";
+            unsigned int successes = get_successes_prob(probSum, faces, dice, rolls);
+            float finalExp = ((float)successes/rolls)*100;
+            float theory = get_theoretical_prob(faces, dice, probSum) * 100;
+            float diff = finalExp - theory;
+            std::cout << "Probability of sum " << probSum << " with " << dice << " dice out of " << rolls << " rolls:\n"
+                    << "Experimental: " << finalExp << "% (" << successes << " out of " << rolls << ")\n"
+                    << "Theoretical: " << theory << "%\n"
+                    << "Difference: " << diff << "%\n";
             break;
         }
         case 2:

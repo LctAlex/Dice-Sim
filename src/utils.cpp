@@ -8,7 +8,7 @@ void print_help()
                     << "'--dice <value>' (values: [1,...,MAX_INT]) <- Number of dice to roll. (2 dice by default)\n"
                     << "'--rolls <value>' (values: [1,...,MAX_INT]) <- Number of rolls for each dice. (100 rolls by default)\n"
                     << "'--game <mode>' (modes: ['stats', 'prob' <takes VALUE>, 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
-                    << "Command example: ./program --dice 20 --faces 12 --game prob 7\n"
+                    << "Command example: ./program --rolls 200 --dice 20 --faces 12 --game prob 7\n"
                     << "Use '--h' or '--help' to see this again.\n"
                     << "Use '--.' to just go with the defaults.\n"
                     << "\n";

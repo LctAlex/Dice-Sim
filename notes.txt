@@ -5,3 +5,7 @@ must check if faces = {6, 8, 10, 12, 20} tho..
 --game prob should take as VALUE between: [dice*rolls, dice*rolls*faces];
 
 for --game sum and --game stats I get the sum in 2 different methods... maybe I should only keep the get_vec_sum() from stats
+
+I mainly used AI for:
+-reading input
+-theoretical probability
