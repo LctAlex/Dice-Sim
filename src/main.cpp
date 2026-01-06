@@ -6,6 +6,7 @@
 
 #include "numbers.hpp"
 #include "utils.hpp"
+#include "games.hpp"
 
 #define DEFAULT_FACES 6
 #define DEFAULT_DICE 2
@@ -18,6 +19,7 @@ int main(int argc, char* argv[])
     unsigned int rolls = DEFAULT_ROLLS;
     char game[] = "stats";
     
+    uint32_t seed = 0;
     unsigned int probSum = 0;
 
     if(argc == 1)
@@ -28,7 +30,7 @@ int main(int argc, char* argv[])
 
     for(int i = 1; i < argc; i++)
     {
-        if (strcmp(argv[i], "--.") == 0) //will go with defaults for what hasn't changed
+        if (strcmp(argv[i], "--.") == 0) //will go with defaults (for what hasn't changed)
         {
             break;
         }
@@ -94,6 +96,15 @@ int main(int argc, char* argv[])
                 i++;
             }
         }
+        else if ((strcmp(argv[i], "--seed") == 0))
+        {
+            if(((i+1) >= argc) || (!is_number(argv[i+1]))) print_error("No valid <value> given to '--seed'", false);
+            else
+            {
+                seed = atol(argv[i+1]);
+                i++;
+            }
+        }
         else if ((strcmp(argv[i], "--help") == 0) || (strcmp(argv[i], "--h") == 0))
         {
             print_help();
@@ -106,9 +117,29 @@ int main(int argc, char* argv[])
         }
     }
 
-    print_info(faces, dice, rolls, game, probSum);
-    int index = find_gamemode(game);
+    if(strcmp(game, "craps") == 0)
+    {}
+    if(strcmp(game, "yahtzee") == 0)
+    {
+        dice = 5;
+        faces = 6;
+        rolls = 13;
+    }
+
+    if(!seed)
+    {
+        seed = time(NULL);
+        uint32_t *seedPtr = &seed;
+        update_XORshift_seed(seedPtr); //for randomizing the seed
+        srand(seed);
+    }
+
     //const char* gameVec[5] = {"stats", "prob", "sum", "craps", "yahtzee"};
+    int index = find_gamemode(game);
+    if (index > 2) std::cout << "\nAny modifications to '--faces', '--dice' or '--rolls' will be overwritten-\n"
+                            << "because of the '" << game << "' Game Mode.\n";
+    print_info(faces, dice, rolls, game, probSum, seed); //if the gamemode isn't craps or yahtzee
+
     switch(index)
     {
         case 0:
@@ -127,6 +158,7 @@ int main(int argc, char* argv[])
             std::cout << "\nMean: " << mean
                     << " (Theoretical: " << get_theoretical_mean(faces) << ")\n"
                     << "Standard deviation: " << stdDev << '\n';
+            free(resultVec);
             break;
         }
         case 1:
@@ -146,6 +178,109 @@ int main(int argc, char* argv[])
             unsigned int sum = get_sum(faces, dice, rolls);
             std::cout << "Total SUM: "<< sum << '\n';
             break;
+        }
+        case 3:
+        {
+            std::cout << "Craps\n";
+            break;
+        }
+        case 4:
+        {
+            std::cout << "Yahtzee:\n";
+            bool* upperList = new_list_vec(6);
+            bool* lowerList = new_list_vec(7);
+            unsigned int* yahtzVec;
+            int opt = 0;
+            int rerolls = 2;
+            bool roll = true;
+            while(rolls > 0)
+            {
+                if(roll)
+                {
+                    std::cout << "\nRolling...";
+                    yahtzVec = new_yahtz_vec(faces, dice);
+                    roll = false;
+                    rerolls = 2;
+                } 
+                print_yahtz_vec(yahtzVec, dice, rolls);
+                std::cout << "\nChoose: \n"
+                        << ((rerolls)? ("0. Reroll a dice\n") : ("\0"))
+                        << "1. Upper section (Aces, Twos...)\n"
+                        << "2. Lower section (N of a Kind, Full House...)\n"
+                        << ">_: ";
+                std::cin >> opt;
+                ignore_nl();
+                switch(opt)
+                {
+                    case 0:
+                    {
+                        if(!rerolls) std::cout << "\nCan't reroll anymore for this turn!\n";
+                        else
+                        {
+                            int choice;
+                            print_yahtz_vec(yahtzVec, dice, rolls);
+                            std::cout << "\nChoose which dice to REROLL\n"
+                                    << "(0. Go back)\n"
+                                    << ">_: ";
+                            std::cin >> choice;
+                            ignore_nl();
+                            if(!choice) break;
+                            else if((choice < 1 )||(choice > dice)) std::cout << "\nError with reading input, please try again\n";
+                            else
+                            {
+                                update_yahtz_vec(yahtzVec, choice-1, faces);
+                                rerolls--;
+                            }
+                        }
+                        break;
+                    }
+                    case 1:
+                    {
+                        int choice;
+                        print_yahtz_vec(yahtzVec, dice, rolls);
+                        // std::cout << "\nChoose how to score:\n"
+                        //         << "(0. Go back)\n"
+                        //         << "1. Add Aces\n"
+                        //         << "2. Add Twos\n"
+                        //         << "3. Add Threes\n"
+                        //         << "4. Add Fours\n"
+                        //         << "5. Add Fives\n"
+                        //         << "6. Add Sixes\n"
+                        //         << ">_: ";
+                        print_available_list(upperList, true);
+                        std::cin >> choice;
+                        ignore_nl();
+                        if(!choice) break;
+                        else if((choice < 1) || (choice > 6)) std::cout << "\nError with reading input, please try again\n";
+                        else
+                        {
+                            if(is_list_available(upperList, choice-1))
+                            {
+                                unsigned int sum = get_sum_of(yahtzVec, choice, dice);
+                                update_list_vec(upperList, choice-1);
+                                std::cout << "\nTemporary UPPER score: " << sum << std::endl;
+                                roll = true;
+                            }
+                            else std::cout << "\nThat option is no longer available!\n Try again\n";
+                        }
+                        break;
+                    }
+                    case 2:
+                    {
+
+                        roll = true;
+                        break;
+                    }
+                    default:
+                    {
+                        std::cout << "That option is not available! Try again.\n"; //roll = false
+                        break;
+                    }
+                }
+                if(roll) rolls--;
+            }
+            free(upperList);
+            free(lowerList);
         }
     }
        

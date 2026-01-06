@@ -11,13 +11,13 @@ void update_XORshift_seed(uint32_t* seed) //I don't really need to use a pointer
 
 unsigned int get_random_number(unsigned int min, unsigned int max) //requires an already-set srand(seed)
 {
-    return min + (rand() % max);
+    return min + rand() % (max - min + 1);
 }
 
-unsigned int* init_empty_vec(unsigned int faces) //I should generalize this one
+unsigned int* init_empty_vec(unsigned int size) //I should generalize this one
 {
-    unsigned int* finalVec = (unsigned int*)malloc(faces * sizeof(unsigned int)); 
-    for(int i = 0; i < faces; i++)
+    unsigned int* finalVec = (unsigned int*)malloc(size * sizeof(unsigned int)); 
+    for(int i = 0; i < size; i++)
     {
         *(finalVec + i) = 0;
     }
@@ -26,18 +26,14 @@ unsigned int* init_empty_vec(unsigned int faces) //I should generalize this one
 
 unsigned int* get_stats_vec(unsigned int faces, unsigned int dice, unsigned int rolls) //Gives a vector (size of faces), with each face (index+1) holding a value representing the number of it's appearence
 {
-    uint32_t seed = time(NULL);
-    uint32_t* seedPtr = &seed; 
-    update_XORshift_seed(seedPtr);
-    srand(seed);
     unsigned int* resultVec = init_empty_vec(faces);
     for(int i = 0; i < dice * rolls; i++)
     {
-        unsigned int index = get_random_number(0, faces);
+        unsigned int index = get_random_number(0, faces-1);
         *(resultVec + index) += 1;
     }
     return resultVec;
-}
+}//*same logic used for yahtzee*
 
 unsigned int get_vec_sum(unsigned int* statsVec, unsigned int faces)
 {
@@ -75,10 +71,6 @@ unsigned int get_successes_prob(unsigned int probSum, unsigned int faces, unsign
 {
     unsigned int tempSum = 0;
     unsigned int successes = 0;
-    uint32_t seed = time(NULL);
-    uint32_t* seedPtr = &seed;
-    update_XORshift_seed(seedPtr);
-    srand(seed);
     for(int i = 0; i < rolls; i++)
     {
         for(int j = 0; j < dice; j++)
@@ -112,10 +104,6 @@ float get_theoretical_prob(unsigned int faces, unsigned int dice, unsigned int p
 unsigned int get_sum(unsigned int rolls, unsigned int dice, unsigned int faces)
 {
     unsigned int sum = 0;
-    uint32_t seed = time(NULL);
-    uint32_t* seedPtr = &seed;
-    update_XORshift_seed(seedPtr);
-    srand(seed);
     for(int i = 0; i < dice * rolls; i++)
     {
         sum += get_random_number(1, faces);

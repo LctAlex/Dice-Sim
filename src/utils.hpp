@@ -2,10 +2,11 @@
 #include <iostream>
 #include <string.h>
 #include <string>
+#include <stdint.h>
 
 void print_help();
 void print_error(const char *err, bool stop);
 bool is_number(const char* str);
-void print_info(unsigned int faces, unsigned int dice, unsigned int rolls, char game[], unsigned int probSum);
+void print_info(unsigned int faces, unsigned int dice, unsigned int rolls, char game[], unsigned int probSum, uint32_t seed);
 const char* get_game(const char* str);
 int find_gamemode(const char* game);

@@ -5,8 +5,7 @@
 
 void update_XORshift_seed(uint32_t* seed);
 unsigned int get_random_number(unsigned int min, unsigned int max);
-unsigned int* init_empty_vec(unsigned int faces);
-//void sort()
+unsigned int* init_empty_vec(unsigned int size);
 //stats:
 unsigned int* get_stats_vec(unsigned int faces, unsigned int dice, unsigned int rolls);
 unsigned int get_vec_sum(unsigned int* statsVec, unsigned int faces);
