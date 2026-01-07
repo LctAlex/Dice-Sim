@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
     int index = find_gamemode(game);
     if (index > 2) std::cout << "\nAny modifications to '--faces', '--dice' or '--rolls' will be overwritten-\n"
                             << "because of the '" << game << "' Game Mode.\n";
-    print_info(faces, dice, rolls, game, probSum, seed); //if the gamemode isn't craps or yahtzee
+    print_info(faces, dice, rolls, game, probSum, seed);
 
     switch(index)
     {
@@ -184,35 +184,201 @@ int main(int argc, char* argv[])
             std::cout << "Craps\n";
             break;
         }
-        case 4:
+        case 4: //YAHTZEE
         {
             std::cout << "Yahtzee:\n";
             bool* upperList = new_list_vec(6);
             bool* lowerList = new_list_vec(7);
+            unsigned int upperScore = 0;
+            unsigned int lowerScore = 0;
             unsigned int* yahtzVec;
             int opt = 0;
             int rerolls = 2;
             bool roll = true;
+            bool YAHTZEE = false;
             while(rolls > 0)
             {
                 if(roll)
                 {
-                    std::cout << "\nRolling...";
                     yahtzVec = new_yahtz_vec(faces, dice);
                     roll = false;
                     rerolls = 2;
                 } 
                 print_yahtz_vec(yahtzVec, dice, rolls);
                 std::cout << "\nChoose: \n"
-                        << ((rerolls)? ("0. Reroll a dice\n") : ("\0"))
+                        << "0. Skip (if no option available)\n"
                         << "1. Upper section (Aces, Twos...)\n"
                         << "2. Lower section (N of a Kind, Full House...)\n"
+                        << ((rerolls)? ("3. Reroll a dice\n") : ("\0"))
                         << ">_: ";
                 std::cin >> opt;
                 ignore_nl();
                 switch(opt)
                 {
                     case 0:
+                    {
+                        std::cout << "Skipping...\n";
+                        roll = true;
+                        break;
+                    }
+                    case 1:
+                    {
+                        int choice;
+                        print_yahtz_vec(yahtzVec, dice, rolls);
+                        print_available_list(upperList, true);
+                        std::cin >> choice;
+                        ignore_nl();
+                        std::cout << std::endl;
+                        if(!choice) break;
+                        else if((choice < 1) || (choice > 6)) std::cout << "\nError with reading input, please try again\n";
+                        else
+                        {
+                            if(is_list_available(upperList, choice-1))
+                            {
+                                update_list_vec(upperList, choice-1);
+                                unsigned int sum = get_sum_of(yahtzVec, choice, dice);
+                                std::cout << "GAINED SCORE: +" << sum << std::endl;
+                                upperScore += sum;
+                                if(upperScore >= 63)
+                                {
+                                    std::cout << "BONUS (> 63): +35\n";
+                                    upperScore += 35;
+                                }
+                                std::cout << "\nTotal UPPER score: " << upperScore << std::endl;
+                                roll = true;
+                            }
+                            else std::cout << "\nThat option is no longer available!\nTry again\n";
+                        }
+                        break;
+                    }
+                    case 2:
+                    {
+                        int choice;
+                        print_yahtz_vec(yahtzVec, dice, rolls);
+                        print_available_list(lowerList, false);
+                        std::cin >> choice;
+                        ignore_nl();
+                        std::cout << std::endl;
+                        if(!choice) break;
+                        else if((choice < 1) || (choice > 7)) std::cout << "\nError with reading input, please try again\n";
+                        else
+                        {
+                            if(is_list_available(lowerList, choice-1))
+                            {
+                                //3oak, 4oak, full house, sm seq, lg seq, Yahtzee, chance
+                                switch(choice)
+                                {
+                                    case 1:
+                                    {
+                                        insertion_sort(yahtzVec, dice);
+                                        if(check_reps(yahtzVec, dice, 3))
+                                        {
+                                            std::cout << "Found 3 of a Kind!\n";
+                                            unsigned int sum = get_yahtz_vec_sum(yahtzVec, dice);
+                                            std::cout << "GAINED SCORE: +" << sum << '\n';
+                                            lowerScore += sum;
+                                            roll = true;
+                                        }
+                                        else std::cout << "Didn't find any 3 of a Kind!\nTry again";
+                                        break;
+                                    }
+                                    case 2:
+                                    {
+                                        insertion_sort(yahtzVec, dice);
+                                        if(check_reps(yahtzVec, dice, 4))
+                                        {
+                                            std::cout << "Found 4 of a Kind!\n";
+                                            unsigned int sum = get_yahtz_vec_sum(yahtzVec, dice);
+                                            std::cout << "GAINED SCORE: +" << sum << '\n';
+                                            lowerScore += sum;
+                                            roll = true;
+                                        }
+                                        else std::cout << "Didn't find any 4 of a Kind!\nTry again";
+                                        break;
+                                    }
+                                    case 3:
+                                    {
+                                        insertion_sort(yahtzVec, dice);
+                                        if(check_fh(yahtzVec))
+                                        {
+                                            std::cout << "Found a Full House!\n";
+                                            std::cout << "GAINED SCORE: +25\n";
+                                            lowerScore += 25;
+                                            roll = true;
+                                        }
+                                        else std::cout << "Didn't find a Full House!\nTry again";
+                                        break;
+                                    }
+                                    case 4:
+                                    {
+                                        insertion_sort(yahtzVec, dice);
+                                        if(check_seq(yahtzVec, dice, 4))
+                                        {
+                                            std::cout<< "Small sequence of 4 found!\n"
+                                                    << "GAINED SCORE: +30\n";
+                                            lowerScore += 30;
+                                            roll = true;
+                                        }
+                                        else std::cout << "Didn't find any small sequence of 4!\nTry again";
+                                        break;
+                                    }
+                                    case 5:
+                                    {
+                                        insertion_sort(yahtzVec, dice);
+                                        if(check_seq(yahtzVec, dice, 5))
+                                        {
+                                            std::cout<< "Large sequence of 5 found!\n"
+                                                    << "GAINED SCORE: +40\n";
+                                            lowerScore += 40;
+                                            roll = true;
+                                        }
+                                        else std::cout << "Didn't find any large sequence of 5!\nTry again";
+                                        break;
+                                    }
+                                    case 6:
+                                    {
+                                        insertion_sort(yahtzVec, dice);
+                                        if(check_reps(yahtzVec, dice, 5))
+                                        {
+                                            if(!YAHTZEE)
+                                            {
+                                                std::cout << "YAHTZEE!!!\n"
+                                                        << "GAINED SCORE: +50\n";
+                                                lowerScore += 50;
+                                                YAHTZEE = true;
+                                            }
+                                            else
+                                            {
+                                                std::cout << "YAHTZEE!!!\n"
+                                                        << "GAINED SCORE (BONUS YAHTZEE): +100\n";
+                                                lowerScore += 100;
+                                            }
+                                            roll = true;
+                                        }
+                                        else std::cout << "Didn't find any YAHTZEE!\nTry again";
+                                        break;
+                                    }
+                                    case 7:
+                                    {
+                                        unsigned int sum = get_yahtz_vec_sum(yahtzVec, dice);
+                                        std::cout << "Adding all dice...\n"
+                                                << "GAINED SCORE: +" << sum << '\n';
+                                        lowerScore += sum;
+                                        roll = true;
+                                        break;
+                                    }
+                                }
+                                if(roll) //'if it's gonna roll' => successfully scored
+                                {
+                                    if(choice != 6) update_list_vec(lowerList, choice-1); //YAHTZEE will always be an option
+                                    std::cout << "\nTotal LOWER score: " << lowerScore << std::endl;
+                                }
+                            }
+                            else std::cout << "\nThat option is no longer available!\nTry again\n";
+                        }
+                        break;
+                    }
+                    case 3:
                     {
                         if(!rerolls) std::cout << "\nCan't reroll anymore for this turn!\n";
                         else
@@ -234,46 +400,9 @@ int main(int argc, char* argv[])
                         }
                         break;
                     }
-                    case 1:
-                    {
-                        int choice;
-                        print_yahtz_vec(yahtzVec, dice, rolls);
-                        // std::cout << "\nChoose how to score:\n"
-                        //         << "(0. Go back)\n"
-                        //         << "1. Add Aces\n"
-                        //         << "2. Add Twos\n"
-                        //         << "3. Add Threes\n"
-                        //         << "4. Add Fours\n"
-                        //         << "5. Add Fives\n"
-                        //         << "6. Add Sixes\n"
-                        //         << ">_: ";
-                        print_available_list(upperList, true);
-                        std::cin >> choice;
-                        ignore_nl();
-                        if(!choice) break;
-                        else if((choice < 1) || (choice > 6)) std::cout << "\nError with reading input, please try again\n";
-                        else
-                        {
-                            if(is_list_available(upperList, choice-1))
-                            {
-                                unsigned int sum = get_sum_of(yahtzVec, choice, dice);
-                                update_list_vec(upperList, choice-1);
-                                std::cout << "\nTemporary UPPER score: " << sum << std::endl;
-                                roll = true;
-                            }
-                            else std::cout << "\nThat option is no longer available!\n Try again\n";
-                        }
-                        break;
-                    }
-                    case 2:
-                    {
-
-                        roll = true;
-                        break;
-                    }
                     default:
                     {
-                        std::cout << "That option is not available! Try again.\n"; //roll = false
+                        std::cout << "\nThat option is not available!\nTry again.\n"; //roll = false
                         break;
                     }
                 }
@@ -281,6 +410,10 @@ int main(int argc, char* argv[])
             }
             free(upperList);
             free(lowerList);
+
+            std::cout<< "Final UPPER score: " << upperScore
+                    << "\nFinal LOWER score: " << lowerScore
+                    << "\n\nFINAL SCORE: " << upperScore+lowerScore;
         }
     }
        

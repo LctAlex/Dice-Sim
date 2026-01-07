@@ -6,6 +6,7 @@
 #include "numbers.hpp"
 
 void ignore_nl();
+void insertion_sort(unsigned int* vec, unsigned int size);
 
 //Upper: 0 -> Aces; 1 -> Twos; 2 -> Threes; 3 -> Fours; 4 -> Fives; 5 -> Sixes
 //Lower: 0 -> 3OaK; 1 -> 4OaK; 2 -> Full House; 3 -> Seq. of 4; 4 -> Seq. of 5; 5 -> YAHTZEE; 6 -> Chance
@@ -13,7 +14,12 @@ bool* new_list_vec(int size);//this vector keeps count of all used/unused scores
 void update_list_vec(bool* vec, int index);
 void print_available_list(bool* vec, bool isUpper);
 bool is_list_available(bool* vec, int index);
+
 unsigned int* new_yahtz_vec(unsigned int faces, unsigned int dice);
 void update_yahtz_vec(unsigned int* vec, int index, unsigned int faces);
 void print_yahtz_vec(unsigned int* vec, unsigned int dice, unsigned int turn); //'turn' ~= 'rolls'
 unsigned int get_sum_of(unsigned int* vec, unsigned int value, unsigned int dice);
+unsigned int get_yahtz_vec_sum(unsigned int* vec, unsigned int dice);
+bool check_reps(unsigned int* vec, unsigned int dice, int reps);
+bool check_seq(unsigned int* vec, unsigned int dice, int seq);
+bool check_fh(unsigned int *vec); //hardcode the length of the vector with 5
