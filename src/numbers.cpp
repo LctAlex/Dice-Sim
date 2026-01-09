@@ -35,7 +35,7 @@ unsigned int* get_stats_vec(unsigned int faces, unsigned int dice, unsigned int 
     return resultVec;
 }//*same logic used for yahtzee*
 
-unsigned int get_vec_sum(unsigned int* statsVec, unsigned int faces)
+unsigned int get_faces_vec_sum(unsigned int* statsVec, unsigned int faces)
 {
     unsigned int sum = 0;
     for(int i = 0; i < faces; i++)

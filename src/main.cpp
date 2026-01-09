@@ -118,14 +118,17 @@ int main(int argc, char* argv[])
     }
 
     if(strcmp(game, "craps") == 0)
-    {}
+    {
+        faces = 6;
+        dice = 2;
+        rolls = 0;
+    }
     if(strcmp(game, "yahtzee") == 0)
     {
-        dice = 5;
         faces = 6;
+        dice = 5;
         rolls = 13;
     }
-
     if(!seed)
     {
         seed = time(NULL);
@@ -152,7 +155,7 @@ int main(int argc, char* argv[])
                         << *(resultVec + i) 
                         << " (" << ((float)*(resultVec + i) / (dice * rolls)) * 100.f << "%)\n";
             }
-            unsigned int totalSum = get_vec_sum(resultVec, faces);
+            unsigned int totalSum = get_faces_vec_sum(resultVec, faces);
             float mean = get_mean(totalSum, dice, rolls);
             float stdDev = get_standard_deviation(resultVec, mean, faces, dice, rolls);
             std::cout << "\nMean: " << mean
@@ -181,7 +184,9 @@ int main(int argc, char* argv[])
         }
         case 3:
         {
-            std::cout << "Craps\n";
+            std::cout << "Craps:\n";
+            print_craps_rules();
+            craps_loop();
             break;
         }
         case 4: //YAHTZEE
@@ -205,7 +210,7 @@ int main(int argc, char* argv[])
                     rerolls = 2;
                 } 
                 print_yahtz_vec(yahtzVec, dice, rolls);
-                std::cout << "\nChoose: \n"
+                std::cout << "\nChoose:\n"
                         << "0. Skip (if no option available)\n"
                         << "1. Upper section (Aces, Twos...)\n"
                         << "2. Lower section (N of a Kind, Full House...)\n"
@@ -410,6 +415,7 @@ int main(int argc, char* argv[])
             }
             free(upperList);
             free(lowerList);
+            free(yahtzVec);
 
             std::cout<< "Final UPPER score: " << upperScore
                     << "\nFinal LOWER score: " << lowerScore
