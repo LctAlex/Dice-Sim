@@ -8,7 +8,7 @@ void print_help()
                     << "'--dice <value>' (values: [1,...,MAX_UINT]) <- Number of dice to roll. (2 dice by default)\n"
                     << "'--rolls <value>' (values: [1,...,MAX_UINT]) <- Number of rolls for each dice. (100 rolls by default)\n"
                     << "'--game <mode>' (modes: ['stats', 'prob' <takes VALUE>, 'sum', 'craps', 'yahtzee']) <- Represents the Game Mode. ('stats' by default)\n"
-                    << "'--seed <value>' (values: [1,...,MAX_UINT32]) <- The value of the seed. (Random by default)"
+                    << "'--seed <value>' (values: [1,...,MAX_UINT32]) <- The value of the seed. (Random by default)\n"
                     << "Command example: ./program --rolls 200 --dice 20 --faces 6 --game prob 7\n"
                     << "Use '--h' or '--help' to see this again.\n"
                     << "Use '--.' to just go with the defaults.\n"
@@ -64,4 +64,9 @@ int find_gamemode(const char* game)
     }
     print_error("Turns out the game mode wasn't registered", false);
     return 0; //will baiscally set the game to 'stats'
+}
+
+void print_graphics(int amount)
+{
+    for(int i = 0; i < amount; i++) std::cout << '*';
 }

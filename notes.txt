@@ -1,8 +1,11 @@
-must check if faces = {6, 8, 10, 12, 20} tho..do I?
-
+!!!must check if faces = {6, 8, 10, 12, 20} tho..do I?
 !!!gotta put Yahtzee inside a function.
-!!!Gotta print probs nicely.
+!!!Gotta print stats nicely.
 
 I mainly used AI for:
 -reading input
 -theoretical probability
+
+FLAWS:
+-no file reading/writing
+-MESSY code
