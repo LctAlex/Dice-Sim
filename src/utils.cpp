@@ -18,7 +18,7 @@ void print_help()
 void print_error(const char *err, bool stop)
 {
     std::cout << "\nERROR:: Error with reading the command. *** " << err << " ***\n";
-    if(stop) std::cout << "Please make sure to add arguments + values/modes like this: '--argument <value/mode>'.\n\n";
+    if(stop) std::cout << "Please use '--help' to see more.\n\n";
 }
 
 void print_info(unsigned int faces, unsigned int dice, unsigned int rolls, char game[], unsigned int probSum, uint32_t seed)

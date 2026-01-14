@@ -1,5 +1,7 @@
 #include "games.hpp"
 
+const char* balanceFile = "write_dir/balance.txt";
+
 void ignore_nl()
 {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -33,6 +35,7 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
     int rerolls = 2;
     bool roll = true;
     bool YAHTZEE = false;
+    bool error = false;
     while(rolls > 0)
     {
         if(roll)
@@ -43,12 +46,17 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
         } 
         print_yahtz_vec(yahtzVec, dice, rolls);
         std::cout << "\nChoose:\n"
-                << "0. Skip (if no option available)\n"
+                << "0. SKIP (if no option available)\n"
                 << "1. Upper section (Aces, Twos...)\n"
                 << "2. Lower section (N of a Kind, Full House...)\n"
                 << ((rerolls)? ("3. Reroll a dice\n") : ("\0"))
                 << ">_: ";
-        std::cin >> opt;
+        if(!(std::cin >> opt))
+        {
+            std::cout << "Error with reading input!\n";
+            error = true;
+            break;
+        }
         ignore_nl();
         switch(opt)
         {
@@ -63,7 +71,12 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
                 int choice = 0;
                 print_yahtz_vec(yahtzVec, dice, rolls);
                 print_available_list(upperList, true);
-                std::cin >> choice;
+                if(!(std::cin >> choice))
+                {
+                    std::cout << "Error with reading input!\n";
+                    error = true;
+                    break;
+                }
                 ignore_nl();
                 std::cout << std::endl;
                 if(!choice) break;
@@ -78,7 +91,7 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
                         upperScore += sum;
                         if(upperScore >= 63)
                         {
-                            std::cout << "BONUS (> 63): +35\n";
+                            std::cout << "\nBONUS ( UPPER score >= 63): +35\n";
                             upperScore += 35;
                         }
                         std::cout << "\nTotal UPPER score: " << upperScore << std::endl;
@@ -93,7 +106,12 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
                 int choice;
                 print_yahtz_vec(yahtzVec, dice, rolls);
                 print_available_list(lowerList, false);
-                std::cin >> choice;
+                if(!(std::cin >> choice))
+                {
+                    std::cout << "Error with reading input!\n";
+                    error = true;
+                    break;
+                }
                 ignore_nl();
                 std::cout << std::endl;
                 if(!choice) break;
@@ -225,7 +243,12 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
                     std::cout << "\nChoose which dice to REROLL\n"
                             << "(0. Go back)\n"
                             << ">_: ";
-                    std::cin >> choice;
+                    if(!(std::cin >> choice))
+                    {
+                        std::cout << "Error with reading input!\n";
+                        error = true;
+                        break;
+                    }
                     ignore_nl();
                     if(!choice) break;
                     else if((choice < 1 )||(choice > dice)) std::cout << "\nError with reading input, please try again\n";
@@ -249,11 +272,14 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
     free(lowerList);
     free(yahtzVec);
 
-    std::cout<< "Final UPPER score: " << upperScore
-            << "\nFinal LOWER score: " << lowerScore
-            << "\n\nFINAL SCORE: " << upperScore+lowerScore
-            << "\n( Added to balance: +$" << (upperScore+lowerScore) / 4 << " )\n";
-    add_to_balance("balance.txt", (upperScore+lowerScore) / 4);
+    if(!error)
+    {
+        std::cout<< "Final UPPER score: " << upperScore
+                << "\nFinal LOWER score: " << lowerScore
+                << "\n\nFINAL SCORE: " << upperScore+lowerScore
+                << "\n( Added to balance: +$" << (upperScore+lowerScore) / 3 << " )\n";
+        add_to_balance(balanceFile, (upperScore+lowerScore) / 3);
+    }
 }
 
 bool* new_list_vec(int size) //note: a great game developer would store all states of the vector in a single byte (1 bool)...but I'm not that guy
@@ -421,7 +447,7 @@ void craps_loop()
     int opt;
     while(loop)
     {
-        if(!betting) betting = take_from_balance("balance.txt", def);
+        if(!betting) betting = take_from_balance(balanceFile, def);
         std::cout << "\n(BETTING MONEY: $" << betting << ")\n"
                 << "Choose game:\n"
                 << "0. Stop betting\n"
@@ -434,14 +460,19 @@ void craps_loop()
                 << "6. Set BETTING MONEY default\n"
                 << "==============\n"
                 << ">_: ";
-        std::cin >> opt;
+        if(!(std::cin >> opt))
+        {
+            std::cout << "Error with reading input!\n";
+            add_to_balance(balanceFile, betting);
+            break;
+        }
         ignore_nl();
         switch(opt)
         {
             case 0: 
             {
                 std::cout << "\nExiting bets...\n";
-                add_to_balance("balance.txt", betting);
+                add_to_balance(balanceFile, betting);
                 loop = false;
                 break;
             }
@@ -457,7 +488,7 @@ void craps_loop()
                     if(is_num_in_vec(res, 2, mainVec1))
                     {
                         std::cout << "You WIN! +$" << betting;
-                        add_to_balance("balance.txt", betting); //this means betting money doubled, while keeping betting money.
+                        add_to_balance(balanceFile, betting); //this means betting money doubled, while keeping betting money.
                         std::cin.ignore();
                     }
                     else if(is_num_in_vec(res, 3, mainVec2))
@@ -486,7 +517,7 @@ void craps_loop()
                     if(is_num_in_vec(res, 3, mainVec2))
                     {
                         std::cout << "You WIN! +$" << betting;
-                        add_to_balance("balance.txt", betting);
+                        add_to_balance(balanceFile, betting);
                         std::cin.ignore();
                     }
                     else if(is_num_in_vec(res, 2, mainVec1)) 
@@ -511,8 +542,8 @@ void craps_loop()
                 unsigned int res = roll_2dice();
                 if(is_num_in_vec(res, 7, fieldVec))
                 {
-                    std::cout << "You WIN!";
-                    add_to_balance("balance.txt", betting);
+                    std::cout << "You WIN! +$" << betting;
+                    add_to_balance(balanceFile, betting);
                     std::cin.ignore();
                 }
                 else
@@ -532,7 +563,12 @@ void craps_loop()
                         << "2. Lay Bet (Big win)\n"
                         << "3. Special bet\n"
                         << ">_: ";
-                std::cin >> choice;
+                if(!(std::cin >> choice))
+                {
+                    std::cout << "Error with reading input!\n";
+                    add_to_balance(balanceFile, betting);
+                    break;
+                }
                 ignore_nl();
                 switch(choice)
                 {
@@ -553,7 +589,7 @@ void craps_loop()
                             if(betting < 5 && betting != 0) res = 1;
                             else res = betting / 5;
                             std::cout << "You WIN! +$" << res;
-                            add_to_balance("balance.txt", res);
+                            add_to_balance(balanceFile, res);
                         }
                         std::cin.ignore();
                         break;
@@ -566,7 +602,7 @@ void craps_loop()
                         if(res == 7) 
                         {
                             std::cout << "You WIN! +$" << betting * 10;
-                            add_to_balance("balance.txt", betting * 10);
+                            add_to_balance(balanceFile, betting * 10);
                         }
                         else
                         {
@@ -582,21 +618,31 @@ void craps_loop()
                         unsigned int num = 0;
                         std::cout << "You only have ONE roll!\n"
                                 << "Bet your number: ";
-                        std::cin >> num;
+                        if(!(std::cin >> num))
+                        {
+                            std::cout << "Error with reading input!\n";
+                            add_to_balance(balanceFile, betting);
+                            break;
+                        }
                         ignore_nl();
                         while(num < 2 || num > 12)
                         {
                             std::cout << num << " is out of bounds!\n"
                                     << "Try adding a number between 2 and 12\n"
                                     << ">_: ";
-                            std::cin >> num;
+                           if(!(std::cin >> num))
+                            {
+                                std::cout << "Error with reading input!\n";
+                                add_to_balance(balanceFile, betting);
+                                break;
+                            }
                             ignore_nl();
                         }
                         unsigned int res = roll_2dice();
                         if(res == num)
                         {
                             std::cout << "YOU WIN!!! +$" << betting * 15;
-                            add_to_balance("balance.txt", betting * 15);
+                            add_to_balance(balanceFile, betting * 15);
                         }
                         else
                         {
@@ -617,7 +663,7 @@ void craps_loop()
             }
             case 5:
             {
-                std::cout << "Your current balance: " << read_balance("balance.txt");
+                std::cout << "Your current balance: " << read_balance(balanceFile);
                 std::cin.ignore();
                 break;
             }
@@ -627,10 +673,15 @@ void craps_loop()
                 std::cout << "TIP: This option sets your betting money to a default sum (whenever you lose all of them)\n"
                         << "\nYour betting money default: " << def << '\n'
                         << "New betting money default: ";
-                std::cin >> sum;
+                if(!(std::cin >> sum))
+                {
+                    std::cout << "Error with reading input!\n";
+                    add_to_balance(balanceFile, betting);
+                    break;
+                }
                 if(betting != 0) //we add to the balance what we currently have in hand
                 {
-                    add_to_balance("balance.txt", betting);
+                    add_to_balance(balanceFile, betting);
                     betting = 0;
                 }
                 def = sum;
@@ -651,7 +702,7 @@ void craps_loop()
 
 void print_craps_rules()
 {
-    std::cout << "RULES:\n\
+    std::cout << "BETTING MODES:\n\
 ============================\n\
 -Pass Line:\n\
     -Win: 7 or 11\n\
@@ -727,6 +778,11 @@ int read_balance(const char* fileName)
 {
     std::fstream file;
     file.open(fileName, std::ios::in);
+    if(!file.is_open())
+    {
+        std::cout << "Failed to open file!";
+        return 0;
+    } 
     int number;
     file >> number;
     file.close();
@@ -737,8 +793,15 @@ void write_balance(const char* fileName, int number)
 {
     std::fstream file;
     file.open(fileName, std::ios::out);
-    file << number;
-    file.close();
+    if(!file.is_open())
+    {
+        std::cout << "Failed to open file!";
+    }
+    else
+    {
+        file << number;
+        file.close();
+    }
 }
 
 unsigned int take_from_balance(const char* fileName, unsigned int minus)
@@ -755,6 +818,7 @@ unsigned int take_from_balance(const char* fileName, unsigned int minus)
         write_balance(fileName, balance);
         return minus;
     }
+    return 0;
 }
 
 void add_to_balance(const char* fileName, unsigned int plus)

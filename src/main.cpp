@@ -190,9 +190,12 @@ int main(int argc, char* argv[])
             std::cout << "Show CRAPS info?\n"
                     << "0. No\n1. Yes\n>_: ";
             int showInfo = 0;
-            std::cin >> showInfo;
-            if(showInfo) print_craps_rules();
-            else std::cout << "Error\n";
+            if(!(std::cin >> showInfo))
+            {
+                std::cout << "Error with reading input\n";
+                break;
+            }
+            else if(showInfo) print_craps_rules();
             ignore_nl();
             craps_loop();
             break;

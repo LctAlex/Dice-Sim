@@ -8,7 +8,6 @@ RUN g++ -static -o main src/*.cpp
 
 FROM scratch
 
-# Dam COPY in container doar la fisierul binar
 COPY --from=builder /build/main /main
 
 ENTRYPOINT ["/main"]
