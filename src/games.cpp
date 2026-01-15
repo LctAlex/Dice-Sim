@@ -1,6 +1,7 @@
 #include "games.hpp"
 
 const char* balanceFile = "write_dir/balance.txt";
+bool fileExists;
 
 void ignore_nl()
 {
@@ -36,6 +37,13 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
     bool roll = true;
     bool YAHTZEE = false;
     bool error = false;
+    //Checking if the balance file exists
+    std::fstream testFile;
+    testFile.open(balanceFile, std::ios::out);
+    if(testFile.is_open()) fileExists = true;
+    else fileExists = false;
+    testFile.close();
+    //
     while(rolls > 0)
     {
         if(roll)
@@ -274,7 +282,7 @@ void yahtzee_loop(unsigned int faces, unsigned int dice, unsigned int rolls)
 
     if(!error)
     {
-        std::cout<< "Final UPPER score: " << upperScore
+        std::cout<< "\nFinal UPPER score: " << upperScore
                 << "\nFinal LOWER score: " << lowerScore
                 << "\n\nFINAL SCORE: " << upperScore+lowerScore
                 << "\n( Added to balance: +$" << (upperScore+lowerScore) / 3 << " )\n";
@@ -445,6 +453,13 @@ void craps_loop()
     unsigned int betting = 0;
     bool loop = true;
     int opt;
+    //Checking if the balance file exists
+    std::fstream testFile;
+    testFile.open(balanceFile, std::ios::in);
+    if(testFile.is_open()) fileExists = true;
+    else fileExists = false;
+    testFile.close();
+    //
     while(loop)
     {
         if(!betting) betting = take_from_balance(balanceFile, def);
@@ -776,54 +791,69 @@ void print_values(unsigned int* vec, int size, const char* text) //Print values 
 
 int read_balance(const char* fileName)
 {
-    std::fstream file;
-    file.open(fileName, std::ios::in);
-    if(!file.is_open())
+    if(fileExists)
     {
-        std::cout << "Failed to open file!";
+        std::fstream file;
+        file.open(fileName, std::ios::in);
+        if(!file.is_open())
+        {
+        std::cout << "Failed to open file!\n";
         return 0;
-    } 
-    int number;
-    file >> number;
-    file.close();
-    return number;
+        } 
+        std::string number;
+        file >> number;
+        if(number == "\0") number = "50"; //Put $50 if file is fresh
+        file.close();
+        return std::stoi(number);
+    }
+    else return 0;
 }
 
 void write_balance(const char* fileName, int number)
 {
-    std::fstream file;
-    file.open(fileName, std::ios::out);
-    if(!file.is_open())
+    if(fileExists)
     {
-        std::cout << "Failed to open file!";
-    }
-    else
-    {
-        file << number;
-        file.close();
+        std::fstream file;
+        file.open(fileName, std::ios::out);
+        if(!file.is_open())
+        {
+            std::cout << "Failed to open file!\n";
+        }
+        else
+        {
+            file << number;
+            file.close();
+        }
     }
 }
 
 unsigned int take_from_balance(const char* fileName, unsigned int minus)
 {
-    unsigned int balance = read_balance(fileName);
-    if(minus > balance) 
+    if(fileExists)
     {
-        write_balance(fileName, 0);
-        return balance;
+        unsigned int balance = read_balance(fileName);
+        if(minus > balance) 
+        {
+            write_balance(fileName, 0);
+            return balance;
+        }
+        else
+        {
+            balance -= minus;
+            write_balance(fileName, balance);
+            return minus;
+        }
+        return 0;
     }
-    else
-    {
-        balance -= minus;
-        write_balance(fileName, balance);
-        return minus;
-    }
-    return 0;
+    else return 0;
 }
 
 void add_to_balance(const char* fileName, unsigned int plus)
 {
-    unsigned int balance = read_balance(fileName);
-    balance += plus;
-    write_balance(fileName, balance);
+    if(fileExists)
+    {
+        unsigned int balance = read_balance(fileName);
+        balance += plus;
+        write_balance(fileName, balance);
+    }
 }
