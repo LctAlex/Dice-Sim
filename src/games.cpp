@@ -456,7 +456,11 @@ void craps_loop()
     //Checking if the balance file exists
     std::fstream testFile;
     testFile.open(balanceFile, std::ios::in);
-    if(testFile.is_open()) fileExists = true;
+    if(testFile.is_open())
+    {
+        read_balance(balanceFile); //setting up file (if empty)
+        fileExists = true;
+    }
     else fileExists = false;
     testFile.close();
     //

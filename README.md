@@ -13,6 +13,31 @@ ___
 docker pull alexlct/dice-sim:latest
 ```
 
+## __Cum se creaza si ruleaza containerul Docker (continuati sa cititi inainte de a rula comanda):__
+```
+docker run alexlct/dice-sim:latest
+```
+
+## **IMPORTANT!!!**
+#### Pentru a va asigura ca puteti interactiona cu joculetele:
+```
+docker run -it alexlct/dice-sim:latest
+```
+
+#### Sau pentru a interactiona si salva balanta pentru joculete (RECOMANDAT):
+```
+docker run -it -v "$(pwd)/write_dir:/write_dir" alexlct/dice-sim:latest
+```
+
+## Exemple de rulari (cu Docker):
+```
+docker run alexlct/dice-sim:latest --.
+docker run alexlct/dice-sim:latest --dice 3 --rolls 10 --game prob 15
+docker run -it -v "$(pwd)/write_dir:/write_dir" alexlct/dice-sim:latest --game craps
+docker run alexlct/dice-sim:latest --game stats --faces 20
+docker run -it -v "$(pwd)/write_dir:/write_dir" alexlct/dice-sim:latest --game yahtzee
+```
+
 ***
 
 - ***Comenzi disponibile:***
@@ -21,7 +46,7 @@ docker pull alexlct/dice-sim:latest
     - --rolls < val >
     - --game < mod > [ moduri: ]
         1. stats
-        1. prob < val > [ va da probabilitatea ca (rolls x dice) sa dea suma < val >]
+        1. prob < val > [ va da probabilitatea ca '--dice' zaruri sa dea suma < val > in '--rolls' rulari ]
         1. sum
         1. craps
         1. yahtzee
@@ -30,27 +55,5 @@ docker pull alexlct/dice-sim:latest
     - --help / --h [ afiseaza informatii ]
     - --. [ ruleaza programul cu valorile default ]
 
-## Exemple de rulari (cu Docker):
-```
-docker run alexlct/dice-sim:latest --.
-docker run alexlct/dice-sim:latest --dice 1 --rolls 3 --game prob 15
-docker run -it alexlct/dice-sim:latest --game craps
-docker run alexlct/dice-sim:latest --game stats --faces 20
-docker run -it alexlct/dice-sim:latest --game yahtzee
-```
-## **IMPORTANT!!!**
-#### Pentru a va asigura ca puteti interactiona cu joculetele:
-```
-docker run -it alexlct/dice-sim:latest --game yahtzee  
-[craps sau yahtzee]
-
-```
-#### Pentru a salva si a tine cont de balanta pentru joculete:
-```
-mkdir -p write_dir
-
-docker run -it -v "$(pwd)/write_dir:/write_dir" alexlct/dice-sim:latest --game craps
-[craps sau yahtzee]
-```
 ### BONUS INFO:
-#### La alegerea joculetelor, nu are rost sa adaugati alta comanda, deoarece ele vin cu setari prestabilite
+#### La alegerea joculetelor (CRAPS sau YAHTZEE), nu are rost sa adaugati alta comanda, deoarece ele vin cu setari prestabilite

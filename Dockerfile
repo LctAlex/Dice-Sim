@@ -8,6 +8,6 @@ RUN g++ -static -o main src/*.cpp
 
 FROM scratch
 
-COPY --from=builder /build/main /main
+COPY --from=builder /build/main /dice-sim
 
-ENTRYPOINT ["/main"]
+ENTRYPOINT ["/dice-sim"]
